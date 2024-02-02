@@ -1,0 +1,666 @@
+<style>
+body {
+  color: #1c1917;
+  font-family: Lora, serif;
+  margin: 0;
+}
+
+#site-container {
+  border-radius: 12px;
+  display: grid;
+  grid-gap: 1px;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto auto 1fr auto;
+  margin: 0 auto;
+  margin-top: 6%;
+  max-width: 1024px;
+  overflow: hidden;
+}
+
+#site-container > header {
+  background: #d6d3d1;
+  font-size: 1.45em;
+  grid-column-start: 1;
+  grid-column-end: 13;
+  grid-row-start: 1;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+}
+
+#site-container > aside {
+  background: #e7e5e4;
+  grid-column-start: 1;
+  grid-column-end: 13;
+  grid-row-start: 2;
+  padding: 1em;
+}
+
+#site-container > main {
+  background: #e7e5e4;
+  grid-column-start: 1;
+  grid-column-end: 13;
+  grid-row-start: 3;
+  padding: 1em;
+  position: relative;
+}
+
+#site-container > footer {
+  background: #e7e5e4;
+  grid-row-start: 4;
+  grid-column-start: 1;
+  grid-column-end: 13;
+  padding: 1em;
+  text-align: center;
+}
+
+#properties {
+  background:#d6d3d1;
+  border-radius: 12px;
+  display: grid;
+  font-size: .95em;
+  font-weight: bold;
+  grid-template-columns: 1fr 1fr;
+  line-height: 26px;
+  margin: 0;
+  overflow: hidden;
+  padding: 1em;
+}
+
+#controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  left: 1em;
+  padding: .5em;
+  position: absolute;
+  right: 1em;
+  }
+
+#controls > label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: bold;
+  justify-content: center;
+}
+
+#controls > label input {
+  cursor: pointer;
+  margin: 0;
+}
+
+#controls > button {
+  cursor: pointer;
+  width: 80px;
+}
+
+canvas {
+  background:#d6d3d1;
+  border-radius: 12px;
+  width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+  #site-container {
+    grid-template-rows: auto 1fr auto;
+  }
+
+  #site-container > aside {
+    grid-column-end: 4;
+    grid-row-start: 2;
+  }
+
+  #site-container > main {
+    grid-column-start: 4;
+    grid-row-start: 2;
+  }
+
+  #site-container > footer {
+    grid-row-start: 3;
+  }
+}
+button {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #008CBA;
+  padding: 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 12px;
+}
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+<span id="tools" style="display: flex;"><div style="width: 25%;"></div><div style="width: 50%; text-align: center;"><button type="button" id="button-play">&#9209;&#65039;</button><button type="button" id="langue" onclick="changeLangue(1);">&#127474;&#127467;</button><button type="button" onclick="changeSpeed(1);">&#10133;</button><button type="button" onclick="changeSpeed(-1);">&#10134;</button></div>
+<div style="width: 25%; text-align: right;"></div></span>
+  <section id="site-container">
+    <aside>
+     <dl id="properties">
+        <dt id="degdt" >Deg : </dt>
+        <dd><span><input type="number" id="deg" min="0" max="360" step="1" style="width:70;"></span>&deg;</dd>
+        <dt id="raddt">Rad : </dt>
+        <dd><span ><input type="number" id="rad" min="0" max="6.2832" step="0.0001" style="width:70;"></span></dd>
+        <dt>action de &pi; : </dt>
+        <dd><span id="pi"></span></dd>
+        <dt id="sindt" style="color:#14b8a6">Sin : </dt>
+        <dd><span id="sin" style="color:#14b8a6">0</span></dd>
+        <dt id="cosdt" style="color:#E67E22">Cos : </dt>
+        <dd><span id="cos" style="color:#E67E22">0</span></dd>
+        <dt id="tandt" style="color:#f43f5e">Tan : </dt>
+        <dd><span id="tan" style="color:#f43f5e">0</span></dd>
+        <dt id="cotdt" style="color:#8E44AD">Cot : </dt>
+        <dd><span id="cot" style="color:#8E44AD">0</span></dd>
+            <dt style="display:none">Csc:</dt>
+        <dd style="display:none"><span id="csc">0</span></dd>
+        <dt style="display:none">Sec:</dt>
+        <dd style="display:none"><span id="sec">0</span></dd>
+      </dl>
+    </aside>
+    <main>
+      <nav id="controls">
+     
+      </nav>
+      <canvas></canvas>
+    </main>
+
+  </section>
+<center><a href="https://github.com/johanrdev/trigonometric-visualization-vanilla-js">Johanrdev - github</a></center>
+
+  <script>
+  stepAnim=0.1;
+  /*
+    const properties = {
+    angle: 0,
+    step: .01,
+    radius: canvas.width / 3,
+    origin: {
+      x: canvas.width / 2,
+      y: canvas.height / 2
+    },
+    animating: true
+  }
+
+  */
+function changeSpeed(type)
+{
+if (type==1) 
+  {
+  stepAnim=stepAnim*2;
+  }
+else {stepAnim=stepAnim/2;}
+setCookie("speedAnim", stepAnim, 2147483647); 
+}  
+function changeLangue(val)
+{
+if (val==1)
+{
+if (document.getElementById("langue").innerHTML=="&#127474;&#127467;") 
+  {
+  document.getElementById("langue").innerHTML="&#127468;&#127463;"
+  labels=labelUk;
+  }
+else
+  {
+  document.getElementById("langue").innerHTML="&#127474;&#127467;"
+  labels=labelFr;
+
+  }
+}
+else
+ {
+ if (document.getElementById("langue").innerHTML=="&#127474;&#127467;") {labels=labelFr;}
+ else {labels=labelUk;}
+ }
+  document.getElementById("degdt").innerHTML=labels[0] +" : ";
+  document.getElementById("raddt").innerHTML=labels[1] +" : ";
+  document.getElementById("sindt").innerHTML=labels[2] +" : ";
+  document.getElementById("cosdt").innerHTML=labels[3] +" : ";
+  document.getElementById("tandt").innerHTML=labels[4] +" : ";
+  document.getElementById("cotdt").innerHTML=labels[5] +" : ";
+setCookie("langue", document.getElementById("langue").innerHTML, 2147483647);    
+}   
+
+// Créer ou modifier un cookie
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  let expires = "expires="+d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+  
+// Checker l'existance d'un cookie
+function checkCookie(cname) {
+  let cook = getCookie(cname);
+  return cook;
+}
+// Obtenir le contenu d'un cookie
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+  
+ function pgcd(a, b) {
+    if (b) {
+        return pgcd(b, a % b);
+    } else {
+        return Math.abs(a);
+    }
+}
+  var labelUk=["Deg","Rad","Sin","Cos","Tan","Cot"];
+  var labelFr=["Deg","Rad","Sin","Cos","Tg","Cotg"];
+  var labels=[];
+  
+  if (getCookie("langue")) {document.getElementById("langue").innerHTML=getCookie("langue");changeLangue(0);}
+  
+   (() => {
+  const setupCanvas = () => {
+    const canvas = document.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.width;
+
+    return {
+      canvas,
+      ctx
+    }
+  }
+
+  const drawCircle = (angle) => {
+    // Circle
+    ctx.beginPath();
+    ctx.arc(
+      properties.origin.x, 
+      properties.origin.y, 
+      properties.radius, 
+      0, 2 * Math.PI);
+    ctx.fillStyle = '#e7e5e4';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#78716c';
+    ctx.stroke();
+    ctx.closePath();
+
+    // Angle arc
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x, 
+      properties.origin.y);
+    ctx.arc(
+      properties.origin.x, 
+      properties.origin.y, 
+      properties.radius * .165, 
+      -degreesToRadians(angle), 0);
+    ctx.lineWidth = 2;
+    ctx.fillStyle = '#d6d3d1';
+    ctx.fill();
+    ctx.setLineDash([])
+    ctx.strokeStyle = '#78716c';
+    ctx.stroke();
+    ctx.closePath();
+
+    // Angle symbol
+    ctx.beginPath();
+    ctx.fillStyle = '#78716c';
+    ctx.font = 'italic 28px Arial';
+    ctx.fillText('θ', properties.origin.x + 13, properties.origin.y - 10);
+    ctx.fill();
+    ctx.closePath();
+
+    // Negative x-axis
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x, 
+      properties.origin.y);
+    ctx.lineTo(0, properties.origin.y);
+    ctx.lineWidth = 2;
+    ctx.setLineDash([15, 15]);
+    ctx.strokeStyle = '#78716c';
+    ctx.fillText('-1', properties.origin.x - 130, properties.origin.y - 6);
+    ctx.stroke();
+    ctx.closePath();
+
+    // Positive x-axis
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x, 
+      properties.origin.y);
+    ctx.lineTo(
+      canvas.width, 
+      properties.origin.y);
+    ctx.lineWidth = 3;
+    ctx.setLineDash([]);
+     ctx.fillText('1', properties.origin.x + 110, properties.origin.y - 6);
+     ctx.fillText('&#x27A4;', properties.origin.x + 130, properties.origin.y+8);
+     
+    ctx.strokeStyle = '#78716c';
+    ctx.stroke();
+    ctx.closePath();
+
+    // Negative y-axis
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x, 
+      properties.origin.y);
+    ctx.lineTo(
+      properties.origin.x, 
+      canvas.height);
+    ctx.lineWidth = 2;
+    ctx.setLineDash([15, 15]);
+    ctx.fillText('-1', properties.origin.x -30, properties.origin.y +130);
+    ctx.strokeStyle = '#78716c';
+    ctx.stroke();
+    ctx.closePath();
+
+    // Positive y-axis
+    ctx.beginPath();
+    ctx.moveTo(properties.origin.x, properties.origin.y);
+    ctx.lineTo(properties.origin.x, 0);
+    ctx.lineWidth = 3;
+    ctx.fillText('1', properties.origin.x -20, properties.origin.y -110);
+    ctx.fillText('&#x25B2; ', properties.origin.x-14, properties.origin.y -140);
+    
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#78716c';
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  const drawRadius = (radians, color, width) => {
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x, 
+      properties.origin.y);
+    ctx.lineTo(
+      properties.origin.x + properties.radius * Math.cos(radians),
+      properties.origin.y - properties.radius * Math.sin(radians));
+    ctx.lineWidth = width;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  const drawSine = (radians, color, width) => {
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x + properties.radius * Math.cos(radians),
+      properties.origin.y - properties.radius * Math.sin(radians));
+    ctx.lineTo(
+      properties.origin.x + properties.radius * Math.cos(radians),
+      properties.origin.y);
+    ctx.lineWidth = width;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  const drawCosine = (radians, color, width) => {
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x, 
+      properties.origin.y - properties.radius * Math.sin(radians));
+    ctx.lineTo(
+      properties.origin.x + properties.radius * Math.cos(radians),
+      properties.origin.y - properties.radius * Math.sin(radians));
+    ctx.lineWidth = width;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  const drawTangent = (radians, color, width) => {
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x + properties.radius * Math.cos(radians),
+      properties.origin.y - properties.radius * Math.sin(radians));
+    ctx.lineTo(
+      properties.origin.x + properties.radius * (1 / Math.cos(radians)),
+      properties.origin.y);
+    ctx.lineWidth = width;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  const drawCosecant = (radians, color, width) => {
+
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x, 
+      properties.origin.y);
+    ctx.lineTo(
+      properties.origin.x, 
+      properties.origin.y - properties.radius * (1 / Math.sin(radians)));
+    ctx.lineWidth = width;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  const drawSecant = (radians, color, width) => {
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      properties.origin.x, 
+      properties.origin.y);
+
+    ctx.lineTo(
+      properties.origin.x + properties.radius * (1 / Math.cos(radians)), 
+      properties.origin.y);
+
+    ctx.lineWidth = width;
+ 
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = color;
+
+    ctx.stroke();
+
+    ctx.closePath();
+
+  }
+
+  const drawCotangent = (radians, color, width) => {
+    ctx.beginPath();
+    ctx.moveTo(
+      properties.origin.x + properties.radius * Math.cos(radians),
+      properties.origin.y - properties.radius * Math.sin(radians));
+    ctx.lineTo(
+      properties.origin.x,
+      properties.origin.y - properties.radius * (1 / Math.sin(radians)));
+    ctx.lineWidth = width;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  const drawDot = (radius, x, y, fill, stroke, width) => {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    ctx.lineWidth = width;
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = stroke;
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  const clearCanvas = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const degreesToRadians = (degrees) => degrees * Math.PI / 180;
+
+  const updateFrame = (angle) => {
+
+    const radians = degreesToRadians(angle);
+    clearCanvas();
+    drawCircle(angle);
+
+    if (angle > 359) angle = 0;
+
+    drawSine(radians, '#14b8a6', 2);
+    drawCosine(radians, '#E67E22', 2);
+    drawTangent(radians, '#f43f5e', 2);
+    drawSecant(radians, '#7B241C', 4);
+    drawCosecant(radians, '#818cf8', 4);
+    drawCotangent(radians, '#8E44AD', 2);
+    drawRadius(radians, '#b1954c', 4);
+
+    // (cosθ, sinθ)
+    drawDot(8,
+      properties.origin.x + properties.radius * Math.cos(radians),
+      properties.origin.y - properties.radius * Math.sin(radians),
+      '#14b8a6', '#78716c', 1);
+
+    // (0, sinθ)
+    drawDot(8,
+      properties.origin.x,
+      properties.origin.y - properties.radius * Math.sin(radians),
+      '#14b8a6', '#78716c', 1);
+
+    // (cosθ, 0)
+    drawDot(8,
+      properties.origin.x + properties.radius * Math.cos(radians),
+      properties.origin.y,
+      '#14b8a6', '#78716c', 1);
+
+    // (secθ, 0)
+    drawDot(8,
+      properties.origin.x + properties.radius * (1 / Math.cos(radians)),
+      properties.origin.y,
+      '#14b8a6', '#78716c', 1);
+
+    // (0, cscθ)
+    drawDot(8,
+      properties.origin.x,
+      properties.origin.y - properties.radius * (1 / Math.sin(radians)),
+      '#14b8a6', '#78716c', 1);
+
+    // (0, 0)
+    drawDot(8,
+      properties.origin.x,
+      properties.origin.y,
+      '#14b8a6', '#78716c', 1);
+
+    elements.deg.value = angle.toFixed(0);
+    elements.rad.value = radians.toFixed(4);
+    elements.sin.innerHTML = Math.sin(radians).toFixed(4);
+    elements.cos.innerHTML = Math.cos(radians).toFixed(4);
+        elements.csc.innerHTML = (1 / Math.sin(radians)).toFixed(4);
+    elements.sec.innerHTML = (1 / Math.cos(radians)).toFixed(4);
+    elements.tan.innerHTML = Math.tan(radians).toFixed(4);
+    elements.cot.innerHTML = (1 / Math.tan(radians)).toFixed(4);
+
+    var pgd=pgcd(angle.toFixed(0),180);
+    document.getElementById("pi").innerHTML= angle.toFixed(0)/pgd+"&pi;/"+180/pgd;
+    properties.angle = angle;
+   // controls.range.value = angle.toFixed(0);
+
+    if (properties.animating) {
+      window.requestAnimationFrame(() => updateFrame(angle + stepAnim));
+    }
+  }
+
+  const play = () => {
+    properties.animating = true;
+    controls.button.innerHTML = '&#9209;&#65039;'
+  };
+
+  const stop = () => {
+    properties.animating = false;
+    controls.button.innerHTML = '&#9654;&#65039;'
+  };
+
+  const { canvas, ctx } = setupCanvas();
+
+  const controls = {
+    range: document.querySelector('input'),
+    button: document.querySelector('button')
+  }
+
+  const elements = {
+    deg: document.getElementById('deg'),
+    rad: document.getElementById('rad'),
+    sin: document.getElementById('sin'),
+    cos: document.getElementById('cos'),
+    tan: document.getElementById('tan'),
+    csc: document.getElementById('csc'),
+    sec: document.getElementById('sec'),
+    cot: document.getElementById('cot')
+  }
+  
+  const properties = {
+    angle: 0,
+    step: .01,
+    radius: canvas.width / 3,
+    origin: {
+      x: canvas.width / 2,
+      y: canvas.height / 2
+    },
+    animating: true
+  }
+
+  controls.range.addEventListener('input', (event) => {
+    stop();
+
+    updateFrame(parseInt(event.target.value));
+  })
+
+ document.getElementById("rad").addEventListener('input', (event) => {
+    stop();
+
+    updateFrame(parseInt(radians_to_degrees(document.getElementById("rad").value)));
+  })
+  
+  controls.button.addEventListener('click', () => {
+    if (properties.animating) {
+      stop();
+    } else {
+      play();
+    }
+
+    updateFrame(properties.angle);
+  })
+
+  drawCircle();
+  updateFrame(properties.angle);
+})();
+    const radians_to_degrees = rad => (rad * 180.0) / Math.PI;
+  </script>
+</body>
+
+</html>
